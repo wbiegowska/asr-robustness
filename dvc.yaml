@@ -1,120 +1,134 @@
 stages:
   phonemize:
-    cmd: python3 src/phonemize.py --lang en-us --manifest data/manifests/en/clean.jsonl --output data/manifests/en/clean_phon.jsonl
-    deps:
-      - src/phonemize.py
-      - data/manifests/en/clean.jsonl
-    outs:
-      - data/manifests/en/clean_phon.jsonl
+    foreach: ${languages}
+    do:
+      cmd: python3 src/phonemize.py --lang ${item.espeak} --manifest data/manifests/${item.id}/clean.jsonl --output data/manifests/${item.id}/clean_phon.jsonl
+      deps:
+        - src/phonemize.py
+        - data/manifests/${item.id}/clean.jsonl
+      outs:
+        - data/manifests/${item.id}/clean_phon.jsonl
 
   add_noise_40:
-    cmd: python3 src/add_noise.py --input_manifest data/manifests/en/clean_phon.jsonl --snr 40 --output_dir data/noisy/en/snr40 --output_manifest data/manifests/en/noisy_snr40.jsonl
-    deps:
-      - src/add_noise.py
-      - data/manifests/en/clean_phon.jsonl
-    params:
-      - seed
-    outs:
-      - data/noisy/en/snr40
-      - data/manifests/en/noisy_snr40.jsonl
+    foreach: ${languages}
+    do:
+      cmd: python3 src/add_noise.py --input_manifest data/manifests/${item.id}/clean_phon.jsonl --snr 40 --output_dir data/noisy/${item.id}/snr40 --output_manifest data/manifests/${item.id}/noisy_snr40.jsonl
+      deps:
+        - src/add_noise.py
+        - data/manifests/${item.id}/clean_phon.jsonl
+      outs:
+        - data/noisy/${item.id}/snr40
+        - data/manifests/${item.id}/noisy_snr40.jsonl
 
   add_noise_20:
-    cmd: python3 src/add_noise.py --input_manifest data/manifests/en/clean_phon.jsonl --snr 20 --output_dir data/noisy/en/snr20 --output_manifest data/manifests/en/noisy_snr20.jsonl
-    deps:
-      - src/add_noise.py
-      - data/manifests/en/clean_phon.jsonl
-    params:
-      - seed
-    outs:
-      - data/noisy/en/snr20
-      - data/manifests/en/noisy_snr20.jsonl
+    foreach: ${languages}
+    do:
+      cmd: python3 src/add_noise.py --input_manifest data/manifests/${item.id}/clean_phon.jsonl --snr 20 --output_dir data/noisy/${item.id}/snr20 --output_manifest data/manifests/${item.id}/noisy_snr20.jsonl
+      deps:
+        - src/add_noise.py
+        - data/manifests/${item.id}/clean_phon.jsonl
+      outs:
+        - data/noisy/${item.id}/snr20
+        - data/manifests/${item.id}/noisy_snr20.jsonl
 
   add_noise_10:
-    cmd: python3 src/add_noise.py --input_manifest data/manifests/en/clean_phon.jsonl --snr 10 --output_dir data/noisy/en/snr10 --output_manifest data/manifests/en/noisy_snr10.jsonl
-    deps:
-      - src/add_noise.py
-      - data/manifests/en/clean_phon.jsonl
-    params:
-      - seed
-    outs:
-      - data/noisy/en/snr10
-      - data/manifests/en/noisy_snr10.jsonl
+    foreach: ${languages}
+    do:
+      cmd: python3 src/add_noise.py --input_manifest data/manifests/${item.id}/clean_phon.jsonl --snr 10 --output_dir data/noisy/${item.id}/snr10 --output_manifest data/manifests/${item.id}/noisy_snr10.jsonl
+      deps:
+        - src/add_noise.py
+        - data/manifests/${item.id}/clean_phon.jsonl
+      outs:
+        - data/noisy/${item.id}/snr10
+        - data/manifests/${item.id}/noisy_snr10.jsonl
 
   infer_clean:
-    cmd: python3 src/inference.py --manifest data/manifests/en/clean_phon.jsonl --model_name facebook/wav2vec2-lv-60-espeak-cv-ft --output_manifest data/manifests/en/predictions_clean.jsonl
-    deps:
-      - src/inference.py
-      - data/manifests/en/clean_phon.jsonl
-    outs:
-      - data/manifests/en/predictions_clean.jsonl
+    foreach: ${languages}
+    do:
+      cmd: python3 src/inference.py --manifest data/manifests/${item.id}/clean_phon.jsonl --model_name facebook/wav2vec2-lv-60-espeak-cv-ft --output_manifest data/manifests/${item.id}/predictions_clean.jsonl
+      deps:
+        - src/inference.py
+        - data/manifests/${item.id}/clean_phon.jsonl
+      outs:
+        - data/manifests/${item.id}/predictions_clean.jsonl
 
   infer_snr40:
-    cmd: python3 src/inference.py --manifest data/manifests/en/noisy_snr40.jsonl --model_name facebook/wav2vec2-lv-60-espeak-cv-ft --output_manifest data/manifests/en/predictions_snr40.jsonl
-    deps:
-      - src/inference.py
-      - data/manifests/en/noisy_snr40.jsonl
-    outs:
-      - data/manifests/en/predictions_snr40.jsonl
+    foreach: ${languages}
+    do:
+      cmd: python3 src/inference.py --manifest data/manifests/${item.id}/noisy_snr40.jsonl --model_name facebook/wav2vec2-lv-60-espeak-cv-ft --output_manifest data/manifests/${item.id}/predictions_snr40.jsonl
+      deps:
+        - src/inference.py
+        - data/manifests/${item.id}/noisy_snr40.jsonl
+      outs:
+        - data/manifests/${item.id}/predictions_snr40.jsonl
 
   infer_snr20:
-    cmd: python3 src/inference.py --manifest data/manifests/en/noisy_snr20.jsonl --model_name facebook/wav2vec2-lv-60-espeak-cv-ft --output_manifest data/manifests/en/predictions_snr20.jsonl
-    deps:
-      - src/inference.py
-      - data/manifests/en/noisy_snr20.jsonl
-    outs:
-      - data/manifests/en/predictions_snr20.jsonl
+    foreach: ${languages}
+    do:
+      cmd: python3 src/inference.py --manifest data/manifests/${item.id}/noisy_snr20.jsonl --model_name facebook/wav2vec2-lv-60-espeak-cv-ft --output_manifest data/manifests/${item.id}/predictions_snr20.jsonl
+      deps:
+        - src/inference.py
+        - data/manifests/${item.id}/noisy_snr20.jsonl
+      outs:
+        - data/manifests/${item.id}/predictions_snr20.jsonl
 
   infer_snr10:
-    cmd: python3 src/inference.py --manifest data/manifests/en/noisy_snr10.jsonl --model_name facebook/wav2vec2-lv-60-espeak-cv-ft --output_manifest data/manifests/en/predictions_snr10.jsonl
-    deps:
-      - src/inference.py
-      - data/manifests/en/noisy_snr10.jsonl
-    outs:
-      - data/manifests/en/predictions_snr10.jsonl
+    foreach: ${languages}
+    do:
+      cmd: python3 src/inference.py --manifest data/manifests/${item.id}/noisy_snr10.jsonl --model_name facebook/wav2vec2-lv-60-espeak-cv-ft --output_manifest data/manifests/${item.id}/predictions_snr10.jsonl
+      deps:
+        - src/inference.py
+        - data/manifests/${item.id}/noisy_snr10.jsonl
+      outs:
+        - data/manifests/${item.id}/predictions_snr10.jsonl
 
   evaluate_clean:
-    cmd: python3 src/evaluate.py --manifest data/manifests/en/predictions_clean.jsonl --output_metrics metrics/per_clean.json
-    deps:
-      - src/evaluate.py
-      - data/manifests/en/predictions_clean.jsonl
-    metrics:
-      - metrics/per_clean.json:
-          cache: false
+    foreach: ${languages}
+    do:
+      cmd: python3 src/evaluate.py --manifest data/manifests/${item.id}/predictions_clean.jsonl --output_metrics metrics/per_${item.id}_clean.json
+      deps:
+        - src/evaluate.py
+        - data/manifests/${item.id}/predictions_clean.jsonl
+      metrics:
+        - metrics/per_${item.id}_clean.json:
+            cache: false
 
   evaluate_snr40:
-    cmd: python3 src/evaluate.py --manifest data/manifests/en/predictions_snr40.jsonl --output_metrics metrics/per_snr40.json
-    deps:
-      - src/evaluate.py
-      - data/manifests/en/predictions_snr40.jsonl
-    metrics:
-      - metrics/per_snr40.json:
-          cache: false
+    foreach: ${languages}
+    do:
+      cmd: python3 src/evaluate.py --manifest data/manifests/${item.id}/predictions_snr40.jsonl --output_metrics metrics/per_${item.id}_snr40.json
+      deps:
+        - src/evaluate.py
+        - data/manifests/${item.id}/predictions_snr40.jsonl
+      metrics:
+        - metrics/per_${item.id}_snr40.json:
+            cache: false
 
   evaluate_snr20:
-    cmd: python3 src/evaluate.py --manifest data/manifests/en/predictions_snr20.jsonl --output_metrics metrics/per_snr20.json
-    deps:
-      - src/evaluate.py
-      - data/manifests/en/predictions_snr20.jsonl
-    metrics:
-      - metrics/per_snr20.json:
-          cache: false
+    foreach: ${languages}
+    do:
+      cmd: python3 src/evaluate.py --manifest data/manifests/${item.id}/predictions_snr20.jsonl --output_metrics metrics/per_${item.id}_snr20.json
+      deps:
+        - src/evaluate.py
+        - data/manifests/${item.id}/predictions_snr20.jsonl
+      metrics:
+        - metrics/per_${item.id}_snr20.json:
+            cache: false
 
   evaluate_snr10:
-    cmd: python3 src/evaluate.py --manifest data/manifests/en/predictions_snr10.jsonl --output_metrics metrics/per_snr10.json
-    deps:
-      - src/evaluate.py
-      - data/manifests/en/predictions_snr10.jsonl
-    metrics:
-      - metrics/per_snr10.json:
-          cache: false
+    foreach: ${languages}
+    do:
+      cmd: python3 src/evaluate.py --manifest data/manifests/${item.id}/predictions_snr10.jsonl --output_metrics metrics/per_${item.id}_snr10.json
+      deps:
+        - src/evaluate.py
+        - data/manifests/${item.id}/predictions_snr10.jsonl
+      metrics:
+        - metrics/per_${item.id}_snr10.json:
+            cache: false
 
   plot_results:
     cmd: python3 src/plot_results.py
     deps:
       - src/plot_results.py
-      - metrics/per_clean.json
-      - metrics/per_snr40.json
-      - metrics/per_snr20.json
-      - metrics/per_snr10.json
     outs:
-      - figures/per_degradation.png
+      - figures/per_degradation_multi.png
